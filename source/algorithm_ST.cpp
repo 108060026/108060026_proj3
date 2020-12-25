@@ -28,6 +28,9 @@ using namespace std;
 int ans_i = 0,ans_j = 0;
 int DEPTH = 4;
 
+clock_t start, endtime ,start1, endtime1,start2, endtime2,start3, endtime3,start4, endtime4;
+double cpu_time_used;
+
 bool checkrange(int i, int j){
     if(i<0 || i> 4 || j<0 || j>5){
         return false;
@@ -95,6 +98,7 @@ int max(int result1,int result2){
 }
 
 bool no_critial(Board s,int i,int j,int my_color){
+    //start1 = clock();
     int ul = (checkrange(i-1,j-1))? s.get_orbs_num(i-1,j-1) +8-s.get_capacity(i-1,j-1) : 10;
     int u = (checkrange(i-1,j))? s.get_orbs_num(i-1,j-1)+8-s.get_capacity(i-1,j) : 10;
     int ur = (checkrange(i-1,j+1))? s.get_orbs_num(i-1,j-1)+8-s.get_capacity(i-1,j+1) : 10;
@@ -117,14 +121,18 @@ bool no_critial(Board s,int i,int j,int my_color){
         ||(d == 7 && d != 10)||(dr == 7 && dr != 10)||(dl == 7 && dl != 10)||(r == 7 && r != 10)){
         return false;
     }
+    /*endtime1 = clock();
+    cpu_time_used = ((double) (endtime1 - start1)) / CLOCKS_PER_SEC;          //for calculate time spend
+      printf("no_critial_Time = %f\n", cpu_time_used);*/
     return true;
 }
 
 int eval(Board s,int my_color){
+    //start2 = clock();
     int result = 0;
     int cout_me = 0,cout_you = 0;
 
-    for(int i = 0; i<5 ; i++){
+    /*for(int i = 0; i<5 ; i++){
         for(int j = 0 ; j<6 ; j++){
             if(s.get_cell_color(i,j) == 'w'){
                 continue;
@@ -135,59 +143,85 @@ int eval(Board s,int my_color){
             }
         }
     }
-    result = (cout_you>=cout_me)? cout_you-cout_me : cout_me-cout_you; 
-    if(cout_you == 0 && cout_me >0){
-        return 1000;
-    }else if(cout_me == 0 && cout_you >0){
-        return -1000;
-    }   //cornor
-    if(s.get_cell_color(0,0) == my_color && no_critial(s,0,0,my_color)){
-        result+=3;
+    result = (cout_you>=cout_me)? cout_you-cout_me : cout_me-cout_you; */
+
+      //cornor
+    if(s.get_cell_color(0,0) == my_color){
+        if(no_critial(s,0,0,my_color)){
+            result+=3;
+        }
     }
-    if(s.get_cell_color(0,5) == my_color && no_critial(s,0,0,my_color)){
-        result+=3;
+    if(s.get_cell_color(0,5) == my_color){
+        if(no_critial(s,0,5,my_color)){
+            result+=3;
+        }
     }
-    if(s.get_cell_color(4,0) == my_color && no_critial(s,0,0,my_color)){
-        result+=3;
+    if(s.get_cell_color(4,0) == my_color){
+        if(no_critial(s,4,0,my_color)){
+            result+=3;
+        }
     }
-    if(s.get_cell_color(4,5) == my_color && no_critial(s,0,0,my_color)){
-        result+=3;
+    if(s.get_cell_color(4,5) == my_color){
+        if(no_critial(s,4,5,my_color)){
+            result+=3;
+        }
     }   //  edge
     for(int i = 1 ; i<5 ; i++){
-        if(s.get_cell_color(0,i)==my_color&&no_critial(s,0,i,my_color)){
-            result += 2;
+        if(s.get_cell_color(0,i)==my_color){
+            if(no_critial(s,0,i,my_color)){
+                result+=2;
+            }
         }
-        if(s.get_cell_color(4,i)==my_color&&no_critial(s,4,i,my_color)){
-            result += 2;
+        if(s.get_cell_color(4,i)==my_color){
+            if(no_critial(s,4,i,my_color)){
+                result+=2;
+            }
         }
     }
     for(int i = 1 ; i<4 ; i++){
-        if(s.get_cell_color(0,i)==my_color&&no_critial(s,0,i,my_color)){
-            result += 2;
+        if(s.get_cell_color(i,0)==my_color){
+            if(no_critial(s,i,0,my_color)){
+                result+=2;
+            }
         }
-        if(s.get_cell_color(4,i)==my_color&&no_critial(s,4,i,my_color)){
-            result += 2;
+        if(s.get_cell_color(i,5)==my_color){
+            if(no_critial(s,i,5,my_color)){
+                result+=2;
+            }
         }
     }
     for(int i = 0; i<5 ; i++){
         for(int j = 0 ; j<6 ; j++){
-            if(s.get_cell_color(i,j) == my_color && s.get_orbs_num(i,j) == s.get_capacity(i,j)-1
-                && no_critial(s,i,j,my_color)){
-                result+=2;
-            }
-            if(s.get_cell_color(i,j) == my_color && s.get_orbs_num(i,j) == s.get_capacity(i,j)-1
-                && !no_critial(s,i,j,my_color)){
-                result-=2;
-            }
-            if(s.get_cell_color(i,j) == my_color && !no_critial(s,i,j,my_color)){
-                result-=1;
+            if(s.get_cell_color(i,j) == my_color){  
+                cout_me++;
+                if(s.get_orbs_num(i,j) == s.get_capacity(i,j)-1){
+                    if(no_critial(s,i,j,my_color))result+=2;                                            //if the cell is ours and is critial cell with no enemy critial cell nearby -> +2 
+                    else result+=4;                                                                     //if the cell is ours and is critial cell with enemy critial cell nearby -> -4 
+                }else{
+                    if(!no_critial(s,i,j,my_color)) result-=1;
+                    else result+=1;                                           
+                }  
+            }else if(s.get_cell_color(i,j) == 'w'){
+                continue;
+            }else{
+                result-=1; 
+                cout_you++;
             }
         }
     }
+    if(cout_you == 0 && cout_me >0){
+        return 2000;
+    }else if(cout_me == 0 && cout_you >0){
+        return -2000;
+    } 
+
+    /*endtime2 = clock();
+    cpu_time_used = ((double) (endtime2 - start2)) / 1000.0;          //for calculate time spend
+      printf("eval_Time = %.10f\n", cpu_time_used);*/
 
     return result;
 }
-
+//negascout
 int negamax(Board s, Player me, Player you,int my_color, int you_color, int alpha, int beta, int depth){
     if(terminal_teat(s,my_color)){
         return utility(s,my_color);
@@ -195,20 +229,24 @@ int negamax(Board s, Player me, Player you,int my_color, int you_color, int alph
     if(depth == 0){
         return eval(s,my_color);
     }
+    int b = beta;
     int result = -10000;
     for(int i = 0; i<5 ; i++){
         for(int j = 0 ; j<6 ; j++){
             if(s.get_cell_color(i,j) == my_color || s.get_cell_color(i,j) == 'w'){
                 Board next_s = s;
                 next_s.place_orb(i,j,&me);
-                int result_next = max(result,-negamax(next_s, you, me, you_color, my_color, -1 * beta, -1 * alpha, depth-1));
-                if (depth == DEPTH && result != result_next){
+                int result_next = -negamax(next_s, you, me, you_color, my_color, -1 * b, -1 * alpha, depth-1);
+                if(alpha< result_next && result_next < beta)
+                    result_next = -negamax(next_s, you, me, you_color, my_color, -1 * beta, -1 * alpha, depth-1);
+                if (depth == DEPTH && result < result_next){
                     ans_i = i; ans_j = j;
                 }
-                result = result_next;
+                result = max(result,result_next);
                 if (result >= beta)
                     return result;
                 alpha = max(alpha, result);
+                b = alpha + 1;
             }
         }
     }
@@ -217,9 +255,6 @@ int negamax(Board s, Player me, Player you,int my_color, int you_color, int alph
 }
 
 void algorithm_A(Board board, Player player, int index[]){
-    
-    clock_t start, end;
-    double cpu_time_used;
     start = clock();
 
     //////your algorithm design///////////
@@ -233,643 +268,21 @@ void algorithm_A(Board board, Player player, int index[]){
     Player enemy(enemy_color);
 
     negamax(my_board, player, enemy, my_color, enemy_color,-10000,10000,DEPTH);
-    index[0] = ans_i;
+
+    index[0] = ans_i;                                                                           //output
     index[1] = ans_j;
-    //cout<<"i,j ="<< ans_i<<" "<< ans_j<<" "<< my_board.get_cell_color(ans_i,ans_j) <<endl;
+    //cout<<"i,j ="<< ans_i<<" "<< ans_j<<" "<< my_board.get_cell_color(ans_i,ans_j) <<endl;    //for debug
 
 
-/*   
-    int mat1[5][6];     //my chess
-    int mat2[5][6];
 
-    for(int i = 0; i<5 ; i++){
-        for(int j = 0; j<6 ; j++){
-            if(board.get_cell_color(i,j)== my_color){
-                mat1[i][j] = board.get_orbs_num(i,j);
-                mat2[i][j] = -1;
-            }else if(board.get_cell_color(i,j)== 'w'){
-                mat1[i][j] = 0;
-                mat2[i][j] = 0;
-            }else{
-                mat1[i][j] = -1;
-                mat2[i][j] = board.get_orbs_num(i,j);
-            }
-        }
-    }
-
-    bool no_limit = true;
-    int l1=-1,l2=-1;
-
-    for(int i = 0; i<5 ; i++){
-        for(int j = 0; j<6 ; j++){
-            if(mat2[i][j] == board.get_capacity(i,j)-1){
-                no_limit = false;
-                l1 = i; l2 = j;
-            }
-        }
-    }    
-    cout<< no_limit<<endl;
-    if(no_limit == true){
-                   //4 angle
-        if((mat2[0][0]==0 || mat2[0][0]==-1 )&& !(mat1[0][0] == 2) ){
-            index[0] = 0;
-            index[1] = 0;
-        }
-        else if((mat2[0][5]==0 || mat2[0][5]==-1 )&& !(mat1[0][5] == 2) ){
-            index[0] = 0;
-            index[1] = 5;
-        }
-        else if((mat2[4][0]==0 || mat2[4][0]==-1 )&& !(mat1[4][0] == 2) ){
-            index[0] = 4;
-            index[1] = 0;
-        }
-        else if((mat2[4][5]==0 || mat2[4][5]==-1 )&& !(mat1[4][5] == 2) ){
-            index[0] = 4;
-            index[1] = 5;
-        }
-        else{  
-                     //4 side + 2 center
-            if((mat2[2][2]==0 || mat2[2][2]==-1 )&& !(mat1[2][2] == 7)){
-                index[0] = 2;
-                index[1] = 2;
-            }else if((mat2[2][3]==0 || mat2[2][3]==-1 )&& !(mat1[2][3] == 7)){
-                index[0] = 2;
-                index[1] = 3;
-            }
-
-            for(int i = 1 ; i<5 ; i++){
-                if((mat2[0][i]==0 || mat2[0][i]==-1 )&& !(mat1[0][i] == 4) ){
-                    if(i%2 == 0 && mat1[0][i] == 3){
-                        continue;
-                    }
-                    index[0] = 0;
-                    index[1] = i;
-                    break;
-                }else if((mat2[4][i]==0 || mat2[4][i]==-1) && !(mat1[4][i] == 4)){
-                    if(i%2 == 0 && mat1[0][i] == 3){
-                        continue;
-                    }
-                    index[0] = 4;
-                    index[1] = i;
-                    break;
-                }
-            }
-            for(int i = 1 ; i<4 ; i++){
-                if((mat2[i][0]==0 || mat2[i][0]==-1 )&& !(mat1[i][0] == 4) ){
-                    if(i%2 == 0 && mat1[0][i] == 3){
-                        continue;
-                    }
-                    index[0] = i;
-                    index[1] = 0;
-                    break;
-                }else if((mat2[i][5]==0 || mat2[i][5]==-1 )&& !(mat1[i][5] == 4)){
-                    if(i%2 == 0 && mat1[0][i] == 3){
-                        continue;
-                    }
-                    index[0] = i;
-                    index[1] = 5;
-                    break;
-                }
-            }  
-        }
-    }else{
-        int ans[5][6];
-        for(int i = 0; i<5 ; i++){
-            for(int j = 0; j<6 ; j++){
-                if(mat1[i][j] == -1){
-                    ans[i][j] = -1;
-                }else{
-                    ans[i][j] = 0;
-                }
-            }
-        }
-
-        while(1){
-            row = rand() % 5;
-            col = rand() % 6;
-            if((board.get_cell_color(row, col) == my_color || board.get_cell_color(row, col) == 'w')&&(mat2[row][col] == 0||mat2[row][col] == -1)
-                &&ans[row][col] != -1) break;
-        }
-        index[0] = row;
-        index[1] = col;
-
-
-        for(int i = 0; i<5 ; i++){
-            for(int j = 0; j<6 ; j++){
-                if(mat2[i][j] == board.get_capacity(i,j)-1){
-                    int ul1 = (checkrange(i-1,j-1))? mat1[i-1][j-1]+8-board.get_capacity(i-1,j-1) : 10;
-                    int u1 = (checkrange(i-1,j))? mat1[i-1][j]+8-board.get_capacity(i-1,j) : 10;
-                    int ur1 = (checkrange(i-1,j+1))? mat1[i-1][j+1]+8-board.get_capacity(i-1,j+1) : 10;
-                    int l1 = (checkrange(i,j-1))? mat1[i][j-1]+8-board.get_capacity(i,j-1) : 10;
-                    int r1 = (checkrange(i,j+1))? mat1[i][j+1]+8-board.get_capacity(i,j+1) : 10;
-                    int dl1 = (checkrange(i+1,j-1))? mat1[i+1][j-1]+8-board.get_capacity(i+1,j-1) : 10;
-                    int d1 = (checkrange(i+1,j))? mat1[i+1][j]+8-board.get_capacity(i+1,j) : 10;
-                    int dr1 = (checkrange(i+1,j+1))? mat1[i+1][j+1]+8-board.get_capacity(i+1,j+1) : 10;
-
-                    int ul2 = (checkrange(i-1,j-1))? mat2[i-1][j-1]+8-board.get_capacity(i-1,j-1) : 10;
-                    int u2 = (checkrange(i-1,j))? mat2[i-1][j]+8-board.get_capacity(i-1,j) : 10;
-                    int ur2 = (checkrange(i-1,j+1))? mat2[i-1][j+1]+8-board.get_capacity(i-1,j+1) : 10;
-                    int l2 = (checkrange(i,j-1))? mat2[i][j-1]+8-board.get_capacity(i,j-1) : 10;
-                    int r2 = (checkrange(i,j+1))? mat2[i][j+1]+8-board.get_capacity(i,j-1) : 10;
-                    int dl2 = (checkrange(i+1,j-1))? mat2[i+1][j-1]+8-board.get_capacity(i+1,j-1) : 10;
-                    int d2 = (checkrange(i+1,j))? mat2[i+1][j]+8-board.get_capacity(i+1,j) : 10;
-                    int dr2 = (checkrange(i+1,j+1))? mat2[i+1][j+1]+8-board.get_capacity(i+1,j+1) : 10;
-
-                    if(ul1 == 6){
-                        int c11 = (checkrange(i-1,j-2))? mat1[i-1][j-2]+8-board.get_capacity(i-1,j-2) : 10;
-                        int c12 = (checkrange(i-2,j-2))? mat1[i-2][j-2]+8-board.get_capacity(i-2,j-2) : 10;
-                        int c13 = (checkrange(i-2,j-1))? mat1[i-2][j-1]+8-board.get_capacity(i-2,j-1) : 10;
-
-                        int c21 = (checkrange(i-1,j-2))? mat2[i-1][j-2]+8-board.get_capacity(i-1,j-2) : 10;
-                        int c22 = (checkrange(i-2,j-2))? mat2[i-2][j-2]+8-board.get_capacity(i-2,j-2) : 10;
-                        int c23 = (checkrange(i-2,j-1))? mat2[i-2][j-1]+8-board.get_capacity(i-2,j-1) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i-2;
-                                index[1] = j-2;
-                            }else if(c13 == 7){
-                                index[0] = i-2;
-                                index[1] = j-1;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i-1;
-                                index[1] = j-2;
-                            }else if(c13 == 7){
-                                index[0] = i-2;
-                                index[1] = j-1;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i-2;
-                                index[1] = j-2;
-                            }else if(c11 == 7){
-                                index[0] = i-1;
-                                index[1] = j-2;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i-1;
-                                index[1] = j-2;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i-2;
-                                index[1] = j-2;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i-2;
-                                index[1] = j-1;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i-1;
-                                    index[1] = j-2;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i-2;
-                                    index[1] = j-2;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i-2;
-                                    index[1] = j-1;
-                                }
-                            }
-                        }
-
-                    }else if(u1 == 6){
-                        int c11 = (checkrange(i-2,j-1))? mat1[i-2][j-1]+8-board.get_capacity(i-2,j-1) : 10;
-                        int c12 = (checkrange(i-2,j))? mat1[i-2][j]+8-board.get_capacity(i-2,j) : 10;
-                        int c13 = (checkrange(i-2,j+1))? mat1[i-2][j+1]+8-board.get_capacity(i-2,j+1) : 10;
-
-                        int c21 = (checkrange(i-2,j-1))? mat2[i-2][j-1]+8-board.get_capacity(i-2,j-1) : 10;
-                        int c22 = (checkrange(i-2,j))? mat2[i-2][j]+8-board.get_capacity(i-2,j) : 10;
-                        int c23 = (checkrange(i-2,j+1))? mat2[i-2][j+1]+8-board.get_capacity(i-2,j+1) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i-2;
-                                index[1] = j;
-                            }else if(c13 == 7){
-                                index[0] = i-2;
-                                index[1] = j+1;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i-2;
-                                index[1] = j-1;
-                            }else if(c13 == 7){
-                                index[0] = i-2;
-                                index[1] = j+1;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i-2;
-                                index[1] = j;
-                            }else if(c11 == 7){
-                                index[0] = i-2;
-                                index[1] = j-1;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i-2;
-                                index[1] = j-1;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i-2;
-                                index[1] = j;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i-2;
-                                index[1] = j+1;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i-2;
-                                    index[1] = j-1;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i-2;
-                                    index[1] = j;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i-2;
-                                    index[1] = j+1;
-                                }
-                            }
-                        }
-                    }else if(ur1 == 6){
-                        int c11 = (checkrange(i-2,j+1))? mat1[i-2][j+1]+8-board.get_capacity(i-2,j+1) : 10;
-                        int c12 = (checkrange(i-2,j+2))? mat1[i-2][j+2]+8-board.get_capacity(i-2,j+2) : 10;
-                        int c13 = (checkrange(i-1,j+2))? mat1[i-1][j+2]+8-board.get_capacity(i-1,j+2) : 10;
-
-                        int c21 = (checkrange(i-2,j+1))? mat2[i-2][j+1]+8-board.get_capacity(i-2,j+1) : 10;
-                        int c22 = (checkrange(i-2,j+2))? mat2[i-2][j+2]+8-board.get_capacity(i-2,j+2) : 10;
-                        int c23 = (checkrange(i-1,j+2))? mat2[i-1][j+2]+8-board.get_capacity(i-1,j+2) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i-2;
-                                index[1] = j+2;
-                            }else if(c13 == 7){
-                                index[0] = i-1;
-                                index[1] = j+2;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i-2;
-                                index[1] = j+1;
-                            }else if(c13 == 7){
-                                index[0] = i-1;
-                                index[1] = j+2;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i-2;
-                                index[1] = j+2;
-                            }else if(c11 == 7){
-                                index[0] = i-2;
-                                index[1] = j+1;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i-2;
-                                index[1] = j+1;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i-2;
-                                index[1] = j+2;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i-1;
-                                index[1] = j+2;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i-2;
-                                    index[1] = j+1;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i-2;
-                                    index[1] = j+2;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i-1;
-                                    index[1] = j+2;
-                                }
-                            }
-                        }
-                    }else if(l1 == 6){
-                        int c11 = (checkrange(i-1,j-2))? mat1[i-1][j-2]+8-board.get_capacity(i-1,j-2) : 10;
-                        int c12 = (checkrange(i,j-2))? mat1[i][j-2]+8-board.get_capacity(i,j-2) : 10;
-                        int c13 = (checkrange(i+1,j-2))? mat1[i+1][j-2]+8-board.get_capacity(i+1,j-2) : 10;
-
-                        int c21 = (checkrange(i-1,j-2))? mat2[i-1][j-2]+8-board.get_capacity(i-1,j-2) : 10;
-                        int c22 = (checkrange(i,j-2))? mat2[i][j-2]+8-board.get_capacity(i,j-2) : 10;
-                        int c23 = (checkrange(i+1,j-2))? mat2[i+1][j-2]+8-board.get_capacity(i+1,j-2) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i;
-                                index[1] = j-2;
-                            }else if(c13 == 7){
-                                index[0] = i+1;
-                                index[1] = j-2;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i-1;
-                                index[1] = j-2;
-                            }else if(c13 == 7){
-                                index[0] = i+1;
-                                index[1] = j-2;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i;
-                                index[1] = j-2;
-                            }else if(c11 == 7){
-                                index[0] = i-1;
-                                index[1] = j-2;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i-1;
-                                index[1] = j-2;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i;
-                                index[1] = j-2;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i+1;
-                                index[1] = j-2;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i-1;
-                                    index[1] = j-2;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i;
-                                    index[1] = j-2;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i+1;
-                                    index[1] = j-2;
-                                }
-                            }
-                        }
-                    }else if(r1 == 6){
-                        int c11 = (checkrange(i-1,j+2))? mat1[i-1][j+2]+8-board.get_capacity(i-1,j+2) : 10;
-                        int c12 = (checkrange(i,j+2))? mat1[i][j+2]+8-board.get_capacity(i,j+2) : 10;
-                        int c13 = (checkrange(i+1,j+2))? mat1[i+1][j+2]+8-board.get_capacity(i+1,j+2) : 10;
-
-                        int c21 = (checkrange(i-1,j+2))? mat2[i-1][j+2]+8-board.get_capacity(i-1,j+2) : 10;
-                        int c22 = (checkrange(i,j+2))? mat2[i][j+2]+8-board.get_capacity(i,j+2) : 10;
-                        int c23 = (checkrange(i+1,j+2))? mat2[i+1][j+2]+8-board.get_capacity(i+1,j+2) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i;
-                                index[1] = j+2;
-                            }else if(c13 == 7){
-                                index[0] = i+1;
-                                index[1] = j+2;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i-1;
-                                index[1] = j+2;
-                            }else if(c13 == 7){
-                                index[0] = i+1;
-                                index[1] = j+2;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i;
-                                index[1] = j+2;
-                            }else if(c11 == 7){
-                                index[0] = i-1;
-                                index[1] = j+2;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i-1;
-                                index[1] = j+2;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i;
-                                index[1] = j+2;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i+1;
-                                index[1] = j+2;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i-1;
-                                    index[1] = j+2;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i;
-                                    index[1] = j+2;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i+1;
-                                    index[1] = j+2;
-                                }
-                            }
-                        }
-                    }else if(dl1 == 6){
-                        int c11 = (checkrange(i+1,j-2))? mat1[i+1][j-2]+8-board.get_capacity(i+1,j-2) : 10;
-                        int c12 = (checkrange(i+2,j-2))? mat1[i+2][j-2]+8-board.get_capacity(i+2,j-2) : 10;
-                        int c13 = (checkrange(i+2,j-1))? mat1[i+2][j-1]+8-board.get_capacity(i+2,j-1) : 10;
-
-                        int c21 = (checkrange(i+1,j-2))? mat2[i+1][j-2]+8-board.get_capacity(i+1,j-2) : 10;
-                        int c22 = (checkrange(i+2,j-2))? mat2[i+2][j-2]+8-board.get_capacity(i+2,j-2) : 10;
-                        int c23 = (checkrange(i+2,j-1))? mat2[i+2][j-1]+8-board.get_capacity(i+2,j-1) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i+2;
-                                index[1] = j-2;
-                            }else if(c13 == 7){
-                                index[0] = i+2;
-                                index[1] = j-1;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i+1;
-                                index[1] = j-2;
-                            }else if(c13 == 7){
-                                index[0] = i+2;
-                                index[1] = j-1;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i+2;
-                                index[1] = j-2;
-                            }else if(c11 == 7){
-                                index[0] = i+1;
-                                index[1] = j-2;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i+1;
-                                index[1] = j-2;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i+2;
-                                index[1] = j-2;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i+2;
-                                index[1] = j-1;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i+1;
-                                    index[1] = j-2;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i+2;
-                                    index[1] = j-2;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i+2;
-                                    index[1] = j-1;
-                                }
-                            }
-                        }
-
-                    }else if(d1 == 6){
-                        int c11 = (checkrange(i+2,j-1))? mat1[i+2][j-1]+8-board.get_capacity(i+2,j-1) : 10;
-                        int c12 = (checkrange(i+2,j))? mat1[i+2][j]+8-board.get_capacity(i+2,j) : 10;
-                        int c13 = (checkrange(i+2,j+1))? mat1[i+2][j+1]+8-board.get_capacity(i+2,j+1) : 10;
-
-                        int c21 = (checkrange(i+2,j-1))? mat2[i+2][j-1]+8-board.get_capacity(i+2,j-1) : 10;
-                        int c22 = (checkrange(i+2,j))? mat2[i+2][j]+8-board.get_capacity(i+2,j) : 10;
-                        int c23 = (checkrange(i+2,j+1))? mat2[i+2][j+1]+8-board.get_capacity(i+2,j+1) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i+2;
-                                index[1] = j;
-                            }else if(c13 == 7){
-                                index[0] = i+2;
-                                index[1] = j+1;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i+2;
-                                index[1] = j-1;
-                            }else if(c13 == 7){
-                                index[0] = i+2;
-                                index[1] = j+1;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i+2;
-                                index[1] = j;
-                            }else if(c11 == 7){
-                                index[0] = i+2;
-                                index[1] = j-1;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i+2;
-                                index[1] = j-1;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i+2;
-                                index[1] = j;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i+2;
-                                index[1] = j+1;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i+2;
-                                    index[1] = j-1;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i+2;
-                                    index[1] = j;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i+2;
-                                    index[1] = j+1;
-                                }
-                            }
-                        }
-                    }else if(dr1 == 6){
-                        int c11 = (checkrange(i+2,j+1))? mat1[i+2][j+1]+8-board.get_capacity(i+2,j+1) : 10;
-                        int c12 = (checkrange(i+2,j+2))? mat1[i+2][j+2]+8-board.get_capacity(i+2,j+2) : 10;
-                        int c13 = (checkrange(i+1,j+2))? mat1[i+1][j+2]+8-board.get_capacity(i+1,j+2) : 10;
-
-                        int c21 = (checkrange(i+2,j+1))? mat2[i+2][j+1]+8-board.get_capacity(i+2,j+1) : 10;
-                        int c22 = (checkrange(i+2,j+2))? mat2[i+2][j+2]+8-board.get_capacity(i+2,j+2) : 10;
-                        int c23 = (checkrange(i+1,j+2))? mat2[i+1][j+2]+8-board.get_capacity(i+1,j+2) : 10;
-                        
-                        if(c21 == 7){
-                            if(c12 == 7){
-                                index[0] = i+2;
-                                index[1] = j+2;
-                            }else if(c13 == 7){
-                                index[0] = i+1;
-                                index[1] = j+2;
-                            }
-                        }else if(c22 == 7){
-                            if(c11 == 7){
-                                index[0] = i+2;
-                                index[1] = j+1;
-                            }else if(c13 == 7){
-                                index[0] = i+1;
-                                index[1] = j+2;
-                            }
-                        }else if(c23 == 7){
-                            if(c12 == 7){
-                                index[0] = i+2;
-                                index[1] = j+2;
-                            }else if(c11 == 7){
-                                index[0] = i+2;
-                                index[1] = j+1;
-                            }
-                        }else{
-                            if(c11 == 6 && c12 <= 6 && c13 <=6 ){
-                                index[0] = i+2;
-                                index[1] = j+1;
-                            }else if(c12 == 6 && c11 <= 6 && c13 <=6 ){
-                                index[0] = i+2;
-                                index[1] = j+2;
-                            }else if(c13 == 6 && c12 <= 6 && c11 <=6 ){
-                                index[0] = i+1;
-                                index[1] = j+2;
-                            }else{
-                                if(c11 == 5 && c12 <= 5 && c13 <=5 ){
-                                    index[0] = i+2;
-                                    index[1] = j+1;
-                                }else if(c12 == 5 && c11 <= 5 && c13 <=5 ){
-                                    index[0] = i+2;
-                                    index[1] = j+2;
-                                }else if(c13 == 5 && c12 <= 5 && c11 <=5 ){
-                                    index[0] = i+1;
-                                    index[1] = j+2;
-                                }
-                            }
-                        }
-                    }
-
-
-                    if(ul1 == 7){
-                        index[0] = i-1;
-                        index[1] = j-1;
-                    }else if(u1 == 7){
-                        index[0] = i-1;
-                        index[1] = j;
-                    }else if(ur1 == 7){
-                        index[0] = i-1;
-                        index[1] = j+1;
-                    }else if(l1 == 7){
-                        index[0] = i;
-                        index[1] = j-1;
-                    }else if(r1 == 7){
-                        index[0] = i;
-                        index[1] = j+1;
-                    }else if(dl1 == 7){
-                        index[0] = i+1;
-                        index[1] = j-1;
-                    }else if(d1 == 7){
-                        index[0] = i+1;
-                        index[1] = j;
-                    }else if(dr1 == 7){
-                        index[0] = i+1;
-                        index[1] = j+1;
-                    }
-                    
-
-                }
-            }
-        } 
-    }
-  */
-   
-
-    end = clock();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    endtime = clock();
+    cpu_time_used = ((double) (endtime - start)) / CLOCKS_PER_SEC;          //for calculate time spend
       //printf("Time = %f\n", cpu_time_used);
     
 
     if( cpu_time_used>=1){
         printf("%f\n", cpu_time_used);
-        board.print_current_board(index[0], index[1],0);
+        board.print_current_board(index[0], index[1],0);            //to find out which case spent more than 1 sec 
     }
 }
 

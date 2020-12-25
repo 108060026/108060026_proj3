@@ -28,7 +28,7 @@ int main(){
         round++;
 
         if(board.win_the_game(red_player) && !first_two_step){
-            cout << "Red Player won the game !!!" << endl;
+            cout << "Red Player won the game " << endl;
             return 0;
         }
 
