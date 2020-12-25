@@ -24,7 +24,7 @@ int main(){
         
         if(rules_violation(red_player)) {/*cout<<index[0]<<index[1]<<endl;*/return 0;}
 
-        board.print_current_board(index[0], index[1], round);
+        //board.print_current_board(index[0], index[1], round);
         round++;
 
         if(board.win_the_game(red_player) && !first_two_step){
@@ -38,7 +38,7 @@ int main(){
 
         if(rules_violation(blue_player)) return 0;
         
-        board.print_current_board(index[0], index[1], round);
+        //board.print_current_board(index[0], index[1], round);
         round++;
 
         if(board.win_the_game(blue_player) && !first_two_step){
