@@ -21,8 +21,8 @@ int main(){
         //////////// Red Player operations ////////////
         algorithm_A(board, red_player, index);
         board.place_orb(index[0], index[1], &red_player);
-
-        if(rules_violation(red_player)) return 0;
+        
+        if(rules_violation(red_player)) {/*cout<<index[0]<<index[1]<<endl;*/return 0;}
 
         board.print_current_board(index[0], index[1], round);
         round++;
